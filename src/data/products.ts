@@ -1,4 +1,7 @@
 import { Product } from "@/context/CartContext";
+import product10 from "@/assets/product-10.jpg";
+import product25 from "@/assets/product-25.jpg";
+import product50 from "@/assets/product-50.jpg";
 
 export const products: Product[] = [
   {
@@ -8,7 +11,7 @@ export const products: Product[] = [
     price: 99,
     originalPrice: 149,
     stock: 150,
-    image: "",
+    image: product10,
     pieces: 10,
     benefits: [
       "100% natural & chemical-free",
@@ -25,7 +28,7 @@ export const products: Product[] = [
     price: 199,
     originalPrice: 299,
     stock: 100,
-    image: "",
+    image: product25,
     pieces: 25,
     benefits: [
       "Best value for regular use",
@@ -42,7 +45,7 @@ export const products: Product[] = [
     price: 349,
     originalPrice: 499,
     stock: 60,
-    image: "",
+    image: product50,
     pieces: 50,
     benefits: [
       "Best price per piece",
