@@ -91,8 +91,8 @@ const Cart = () => {
                 <span className="text-lg text-primary">₹{totalPrice}</span>
               </div>
             </div>
-            <Button className="mt-6 w-full bg-accent text-accent-foreground hover:bg-accent/90" size="lg">
-              Proceed to Checkout
+            <Button asChild className="mt-6 w-full bg-accent text-accent-foreground hover:bg-accent/90" size="lg">
+              <Link to="/checkout">Proceed to Checkout</Link>
             </Button>
           </div>
         </div>
