@@ -16,8 +16,12 @@ serve(async (req) => {
     const RAZORPAY_KEY_ID = Deno.env.get("RAZORPAY_KEY_ID");
     const RAZORPAY_KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET");
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      console.error("Missing Razorpay credentials. KEY_ID:", !!RAZORPAY_KEY_ID, "KEY_SECRET:", !!RAZORPAY_KEY_SECRET);
       throw new Error("Razorpay credentials not configured");
     }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -27,14 +31,13 @@ serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      console.error("Auth error:", userError?.message);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -66,10 +69,12 @@ serve(async (req) => {
 
     if (!razorpayRes.ok) {
       const errBody = await razorpayRes.text();
+      console.error("Razorpay API error:", razorpayRes.status, errBody);
       throw new Error(`Razorpay order creation failed [${razorpayRes.status}]: ${errBody}`);
     }
 
     const razorpayOrder = await razorpayRes.json();
+    console.log("Razorpay order created:", razorpayOrder.id);
 
     // Generate order number
     const orderNumber = `UPLE-${Date.now().toString(36).toUpperCase()}`;
@@ -95,7 +100,10 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (orderError) throw orderError;
+    if (orderError) {
+      console.error("DB insert error:", orderError);
+      throw orderError;
+    }
 
     // Insert order items
     const orderItems = items.map((item: any) => ({
@@ -107,7 +115,10 @@ serve(async (req) => {
     }));
 
     const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-    if (itemsError) throw itemsError;
+    if (itemsError) {
+      console.error("Order items insert error:", itemsError);
+      throw itemsError;
+    }
 
     return new Response(
       JSON.stringify({
