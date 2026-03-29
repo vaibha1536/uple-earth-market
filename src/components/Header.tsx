@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu, X, Leaf } from "lucide-react";
+import { ShoppingCart, Menu, X, Leaf, User, LogOut } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const { totalItems } = useCart();
+  const { user, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
@@ -30,6 +32,23 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
+          {user ? (
+            <button
+              onClick={signOut}
+              className="hidden items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary md:flex"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="hidden items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary md:flex"
+            >
+              <User className="h-4 w-4" />
+              Sign In
+            </Link>
+          )}
           <Link to="/cart" className="relative p-2 text-foreground/80 transition-colors hover:text-primary">
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
@@ -68,6 +87,24 @@ const Header = () => {
                   {l.label}
                 </Link>
               ))}
+              {user ? (
+                <button
+                  onClick={() => { signOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
             </nav>
           </motion.div>
         )}
