@@ -87,6 +87,24 @@ const Header = () => {
                   {l.label}
                 </Link>
               ))}
+              {user ? (
+                <button
+                  onClick={() => { signOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
             </nav>
           </motion.div>
         )}
