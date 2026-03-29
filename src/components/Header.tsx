@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const { totalItems } = useCart();
+  const { user, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
