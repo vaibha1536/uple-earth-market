@@ -24,8 +24,8 @@ const Footer = () => (
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Contact</h4>
-          <p className="text-sm text-muted-foreground">support@uple.in</p>
-          <p className="text-sm text-muted-foreground">+91 98765 43210</p>
+          <p className="text-sm text-muted-foreground">vaibhavwindow@gmail.com</p>
+          <p className="text-sm text-muted-foreground">+91 6388779800</p>
         </div>
       </div>
       <div className="mt-8 border-t pt-6 text-center text-xs text-muted-foreground">
