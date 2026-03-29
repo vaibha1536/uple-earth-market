@@ -32,6 +32,23 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
+          {user ? (
+            <button
+              onClick={signOut}
+              className="hidden items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary md:flex"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="hidden items-center gap-1.5 text-sm font-medium text-foreground/80 transition-colors hover:text-primary md:flex"
+            >
+              <User className="h-4 w-4" />
+              Sign In
+            </Link>
+          )}
           <Link to="/cart" className="relative p-2 text-foreground/80 transition-colors hover:text-primary">
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
