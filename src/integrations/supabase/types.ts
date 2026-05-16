@@ -61,6 +61,7 @@ export type Database = {
           id: string
           name: string
           order_number: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           phone: string
           pincode: string
@@ -83,6 +84,7 @@ export type Database = {
           id?: string
           name: string
           order_number: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone: string
           pincode: string
@@ -105,6 +107,7 @@ export type Database = {
           id?: string
           name?: string
           order_number?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone?: string
           pincode?: string
@@ -175,6 +178,7 @@ export type Database = {
         | "shipped"
         | "delivered"
         | "cancelled"
+      payment_method: "razorpay" | "cod"
       payment_status: "pending" | "paid" | "failed" | "refunded"
     }
     CompositeTypes: {
@@ -311,6 +315,7 @@ export const Constants = {
         "delivered",
         "cancelled",
       ],
+      payment_method: ["razorpay", "cod"],
       payment_status: ["pending", "paid", "failed", "refunded"],
     },
   },
