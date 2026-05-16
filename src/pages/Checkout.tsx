@@ -194,6 +194,68 @@ const Checkout = () => {
     }
   };
 
+  const handleCODOrder = async () => {
+    if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+      const orderNumber = `UPLE-${Date.now().toString(36).toUpperCase()}`;
+
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user!.id,
+          order_number: orderNumber,
+          subtotal: totalPrice,
+          shipping: 0,
+          total: totalPrice,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          payment_method: "cod",
+          payment_status: "pending",
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        product_id: item.product.id,
+        product_name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+      if (itemsError) throw itemsError;
+
+      setOrderNumber(orderNumber);
+      setOrderPlaced(true);
+      clearCart();
+      toast({ title: "Order placed!", description: `Order ${orderNumber} confirmed. Pay on delivery.` });
+    } catch (err: any) {
+      console.error("COD order error:", err);
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlaceOrder = () => {
+    if (paymentMethod === "cod") {
+      handleCODOrder();
+    } else {
+      handlePayment();
+    }
+  };
+
   if (orderPlaced) {
     return (
       <Layout>
