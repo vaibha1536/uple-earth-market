@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, CreditCard, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, Banknote, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ declare global {
   }
 }
 
+type PaymentMethod = "razorpay" | "cod";
+
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
@@ -25,6 +27,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
 
   const [form, setForm] = useState({
     name: "",
