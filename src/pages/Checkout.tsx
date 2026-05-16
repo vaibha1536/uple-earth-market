@@ -350,21 +350,60 @@ const Checkout = () => {
                   <span className="text-lg text-primary">₹{totalPrice}</span>
                 </div>
               </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="rounded-lg border bg-card p-6 shadow-card">
+              <h3 className="mb-4 font-display text-lg font-semibold">Payment Method</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setPaymentMethod("razorpay")}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-4 transition-colors ${
+                    paymentMethod === "razorpay"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <Wallet className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <p className="font-medium">Razorpay (UPI / Card / Netbanking)</p>
+                    <p className="text-xs text-muted-foreground">Pay securely online</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("cod")}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-4 transition-colors ${
+                    paymentMethod === "cod"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <Banknote className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <p className="font-medium">Cash on Delivery</p>
+                    <p className="text-xs text-muted-foreground">Pay when your order arrives</p>
+                  </div>
+                </button>
+              </div>
               <Button
                 className="mt-6 w-full"
                 size="lg"
-                onClick={handlePayment}
+                onClick={handlePlaceOrder}
                 disabled={loading}
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                ) : paymentMethod === "cod" ? (
+                  <><Banknote className="mr-2 h-4 w-4" /> Place COD Order</>
                 ) : (
                   <><CreditCard className="mr-2 h-4 w-4" /> Pay ₹{totalPrice}</>
                 )}
               </Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Secured by Razorpay. 100% safe & encrypted.
-              </p>
+              {paymentMethod === "razorpay" && (
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  Secured by Razorpay. 100% safe & encrypted.
+                </p>
+              )}
             </div>
           </div>
         </div>
