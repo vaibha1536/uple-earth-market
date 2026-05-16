@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, CreditCard, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, Banknote, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ declare global {
   }
 }
 
+type PaymentMethod = "razorpay" | "cod";
+
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
@@ -25,6 +27,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
 
   const [form, setForm] = useState({
     name: "",
@@ -191,6 +194,68 @@ const Checkout = () => {
     }
   };
 
+  const handleCODOrder = async () => {
+    if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+      const orderNumber = `UPLE-${Date.now().toString(36).toUpperCase()}`;
+
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user!.id,
+          order_number: orderNumber,
+          subtotal: totalPrice,
+          shipping: 0,
+          total: totalPrice,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          payment_method: "cod",
+          payment_status: "pending",
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        product_id: item.product.id,
+        product_name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+      if (itemsError) throw itemsError;
+
+      setOrderNumber(orderNumber);
+      setOrderPlaced(true);
+      clearCart();
+      toast({ title: "Order placed!", description: `Order ${orderNumber} confirmed. Pay on delivery.` });
+    } catch (err: any) {
+      console.error("COD order error:", err);
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlaceOrder = () => {
+    if (paymentMethod === "cod") {
+      handleCODOrder();
+    } else {
+      handlePayment();
+    }
+  };
+
   if (orderPlaced) {
     return (
       <Layout>
@@ -285,21 +350,60 @@ const Checkout = () => {
                   <span className="text-lg text-primary">₹{totalPrice}</span>
                 </div>
               </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="rounded-lg border bg-card p-6 shadow-card">
+              <h3 className="mb-4 font-display text-lg font-semibold">Payment Method</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setPaymentMethod("razorpay")}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-4 transition-colors ${
+                    paymentMethod === "razorpay"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <Wallet className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <p className="font-medium">Razorpay (UPI / Card / Netbanking)</p>
+                    <p className="text-xs text-muted-foreground">Pay securely online</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("cod")}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-4 transition-colors ${
+                    paymentMethod === "cod"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <Banknote className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <p className="font-medium">Cash on Delivery</p>
+                    <p className="text-xs text-muted-foreground">Pay when your order arrives</p>
+                  </div>
+                </button>
+              </div>
               <Button
                 className="mt-6 w-full"
                 size="lg"
-                onClick={handlePayment}
+                onClick={handlePlaceOrder}
                 disabled={loading}
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                ) : paymentMethod === "cod" ? (
+                  <><Banknote className="mr-2 h-4 w-4" /> Place COD Order</>
                 ) : (
                   <><CreditCard className="mr-2 h-4 w-4" /> Pay ₹{totalPrice}</>
                 )}
               </Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Secured by Razorpay. 100% safe & encrypted.
-              </p>
+              {paymentMethod === "razorpay" && (
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  Secured by Razorpay. 100% safe & encrypted.
+                </p>
+              )}
             </div>
           </div>
         </div>
